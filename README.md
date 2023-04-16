@@ -25,7 +25,6 @@ pip install -y requirements.txt
 ```bash
 # 进入独立环境
 cd refjmp/
-virtualenv -p python3 venv
 source venv/bin/activate
 
 # 参数1是输入文件名，参数2是输出文件名
