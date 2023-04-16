@@ -34,7 +34,7 @@ python refjmp.py ./examples/ret2dir.pdf ./examples/ret2dir_linked.pdf
 
 ## 其他说明
 
-目前，refjmp的文献引用判定逻辑还比较简单，会有漏标和误标，但是不影响阅读。后面我们将陆续丰其功能（欢迎提交PR）。另外，flask\_app目录下提供了一个简单的网页版，大家也可以自行搭建使用。
+目前，refjmp的文献引用判定逻辑还比较简单，会有漏标和误标，但是不影响阅读。后面我们将陆续丰富功能（欢迎提交PR）。另外，flask\_app目录下提供了一个简单的网页版refjmp应用，大家也可以自行搭建使用。
 
 本项目由我和chatGPT在相互指导下共同完成 :)
 
