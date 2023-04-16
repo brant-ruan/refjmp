@@ -1,0 +1,7 @@
+pymupdf==1.18.17
+frontend
+tools
+flask
+flask-cors
+PyMuPDF
+

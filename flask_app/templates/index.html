@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- 自定义CSS样式 -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+
+        .dropzone {
+            width: 300px;
+            height: 200px;
+            border: 2px dashed #007bff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .dropzone:hover {
+            background-color: #e9ecef;
+        }
+
+        .filename {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 5px 10px;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .progress {
+            width: 80%;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>论文轻松读</h1>
+        <div class="text-center">
+            <div id="dropzone" class="dropzone">
+                <span id="dropzone-text">点击选择文件或将文件拖放到这里</span>
+                <div id="filename" class="filename" style="display: none;"></div>
+            </div>
+            <form id="upload-form">
+                <input type="file" name="file" id="file-input" accept=".pdf" style="display: none;">
+                <div class="progress" style="display: none;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated"></div>
+                </div>
+                <div id="download-div" style="margin-top: 20px;"></div>
+                <button type="submit" id="upload-button" class="btn btn-primary mb-2">上传</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 引入jQuery和Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $('#upload-form').on('submit', function (e) {
+            e.preventDefault();
+    
+            var formData = new FormData(this);
+            var progressBar = $('<div></div>').css({
+                'background-color': 'blue',
+                'width': '0%',
+                'height': '10px'
+            });
+    
+            $('#upload-button').after(progressBar);
+    
+            $.ajax({
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function (e) {
+                        if (e.lengthComputable) {
+                            var percent = (e.loaded / e.total) * 100;
+                            progressBar.width(percent + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                url: 'http://127.0.0.1:5000/upload',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (data, textStatus, xhr) {
+                    progressBar.remove();
+                    if (xhr.status === 200) {
+                        var outputFilename = xhr.getResponseHeader('Location').split('/').pop();
+                        var downloadLink = $('<a></a>').text('下载处理完成的PDF').attr({
+                            'href': 'javascript:void(0);',
+                            'download': outputFilename
+                        });
+                        downloadLink.on('click', function() {
+                            window.location = 'http://127.0.0.1:5000/download/' + outputFilename;
+                        });
+                        var downloadDiv = $('<div></div>');
+                        downloadDiv.append(downloadLink);
+                        $('#upload-button').after(downloadDiv);
+                    }
+                },
+                error: function () {
+                    progressBar.remove();
+                    alert('处理PDF文件过程中出错');
+                }
+            });
+        });
+    </script>
+
+    <script>
+    // 添加拖放支持
+    var dropzone = document.getElementById('dropzone');
+    var fileInput = document.getElementById('file-input');
+    var dropzoneText = document.getElementById('dropzone-text');
+    var downloadDiv = document.getElementById('download-div');
+
+    fileInput.addEventListener('change', function () {
+        if (fileInput.files.length) {
+            dropzoneText.textContent = fileInput.files[0].name;
+        } else {
+            dropzoneText.textContent = '点击选择文件或将文件拖放到这里';
+        }
+    });
+
+    dropzone.addEventListener('click', function () {
+        fileInput.click();
+    });
+
+    dropzone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
+    });
+
+    dropzone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            dropzoneText.textContent = fileInput.files[0].name;
+        }
+    });
+
+    // 在 AJAX success 回调中修改 downloadLink 的添加方式
+    if (xhr.status === 200) {
+        var outputFilename = xhr.getResponseHeader('Location').split('/').pop();
+        var downloadLink = $('<a></a>').text('下载处理完成的PDF').attr({
+            'href': 'javascript:void(0);',
+            'download': outputFilename
+        });
+        downloadLink.on('click', function() {
+            window.location = 'http://127.0.0.1:5000/download/' + outputFilename;
+        });
+        downloadDiv.innerHTML = '';
+        downloadDiv.append(downloadLink);
+    }
+    </script>
+</body>
+
+</html>
